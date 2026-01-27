@@ -36,7 +36,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\src\ProjectLibrary.Workflow\WorkflowCore.csproj" />
+	  <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
 	</ItemGroup>
 
 </Project>

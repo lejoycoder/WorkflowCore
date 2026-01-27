@@ -156,7 +156,18 @@ namespace WorkflowCore.Services
             {
                 var evt = _events.FirstOrDefault(x => x.Id == id);
                 if (evt != null)
+                {
                     evt.IsProcessed = true;
+                    //_events.Remove(evt);
+                }
+            }
+        }
+
+        public async Task ClearExpiredEvents(DateTime asAt, CancellationToken _ = default)
+        {
+            lock (_events)
+            {
+                _events.RemoveAll(x => x.EventTime < asAt);
             }
         }
 

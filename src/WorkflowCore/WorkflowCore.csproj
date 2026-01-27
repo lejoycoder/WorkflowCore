@@ -5,8 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <PackageId>WorkflowCore</PackageId>
-    <Title>WorkflowCore</Title>
+    <PackageId>WorkflowCore.DesktopLite</PackageId>
+    <Title>WorkflowCore Desktop Lite</Title>
     <Version>2.0.0</Version>
     <PackageOutputPath>..\..\doc\nuget</PackageOutputPath>
     <PackageIcon>workflow.png</PackageIcon>

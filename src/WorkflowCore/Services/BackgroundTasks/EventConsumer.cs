@@ -74,6 +74,8 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                 foreach (var eventId in toQueue)
                     await QueueProvider.QueueWork(eventId, QueueType.Event);
+
+                await _eventRepository.ClearExpiredEvents(DateTime.Now.AddHours(-12));
             }
         }
 
@@ -93,14 +95,15 @@ namespace WorkflowCore.Services.BackgroundTasks
                     continue;
 
                 var siblingEvent = await _eventRepository.GetEvent(eventId, cancellationToken);
-                if ((!siblingEvent.IsProcessed) && (siblingEvent.EventTime < evt.EventTime))
+                if (siblingEvent.IsProcessed)
+                    continue;
+
+                if (siblingEvent.EventTime < evt.EventTime)
                 {
                     await QueueProvider.QueueWork(eventId, QueueType.Event);
                     return false;
                 }
-
-                if (!siblingEvent.IsProcessed)
-                    toQueue.Add(siblingEvent.Id);
+                toQueue.Add(siblingEvent.Id);
             }
 
             try
