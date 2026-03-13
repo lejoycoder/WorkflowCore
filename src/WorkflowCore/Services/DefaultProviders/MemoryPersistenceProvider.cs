@@ -12,7 +12,7 @@ namespace WorkflowCore.Services
 
     public class MemoryPersistenceProvider : IPersistenceProvider
     {
-        private readonly List<WorkflowInstance> _instances = new List<WorkflowInstance>();
+        private readonly Dictionary<string, WorkflowInstance> _instances = new Dictionary<string, WorkflowInstance>();
         private readonly List<EventSubscription> _subscriptions = new List<EventSubscription>();
         private readonly List<Event> _events = new List<Event>();
 
@@ -21,7 +21,7 @@ namespace WorkflowCore.Services
             lock (_instances)
             {
                 workflow.Id = Guid.NewGuid().ToString();
-                _instances.Add(workflow);
+                _instances.Add(workflow.Id, workflow);
                 return workflow.Id;
             }
         }
@@ -30,9 +30,7 @@ namespace WorkflowCore.Services
         {
             lock (_instances)
             {
-                var existing = _instances.First(x => x.Id == workflow.Id);
-                _instances.Remove(existing);
-                _instances.Add(workflow);
+                _instances[workflow.Id] = workflow;
             }
         }
 
@@ -40,9 +38,7 @@ namespace WorkflowCore.Services
         {
             lock (_instances)
             {
-                var existing = _instances.First(x => x.Id == workflow.Id);
-                _instances.Remove(existing);
-                _instances.Add(workflow);
+                _instances[workflow.Id] = workflow;
 
                 lock (_subscriptions)
                 {
@@ -60,7 +56,7 @@ namespace WorkflowCore.Services
             lock (_instances)
             {
                 var now = asAt.Ticks;
-                return _instances.Where(x => x.NextExecution.HasValue && x.NextExecution <= now).Select(x => x.Id).ToList();
+                return _instances.Values.Where(x => x.NextExecution.HasValue && x.NextExecution <= now).Select(x => x.Id).ToList();
             }
         }
 
@@ -68,7 +64,7 @@ namespace WorkflowCore.Services
         {
             lock (_instances)
             {
-                return _instances.Single(x => x.Id == Id);
+                return _instances[Id];
             }
         }
 
@@ -81,7 +77,7 @@ namespace WorkflowCore.Services
 
             lock (_instances)
             {
-                return _instances.Where(x => ids.Contains(x.Id));
+                return _instances.Values.Where(x => ids.Contains(x.Id)).ToList();
             }
         }
 
@@ -89,7 +85,7 @@ namespace WorkflowCore.Services
         {
             lock (_instances)
             {
-                return [.. _instances.Where(x => x.WorkflowName == workflowName)];
+                return [.. _instances.Values.Where(x => x.WorkflowName == workflowName)];
             }
         }
 
@@ -158,6 +154,7 @@ namespace WorkflowCore.Services
                 if (evt != null)
                 {
                     evt.IsProcessed = true;
+                    evt.ProcessedTime = DateTime.Now;
                     //_events.Remove(evt);
                 }
             }
@@ -167,7 +164,7 @@ namespace WorkflowCore.Services
         {
             lock (_events)
             {
-                _events.RemoveAll(x => x.EventTime < asAt);
+                _events.RemoveAll(x => x.IsProcessed && x.ProcessedTime.HasValue && x.ProcessedTime.Value < asAt);
             }
         }
 
@@ -211,6 +208,7 @@ namespace WorkflowCore.Services
                 if (evt != null)
                 {
                     evt.IsProcessed = false;
+                    evt.ProcessedTime = null;
                 }
             }
         }

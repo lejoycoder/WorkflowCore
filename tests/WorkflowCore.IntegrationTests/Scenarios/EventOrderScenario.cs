@@ -4,6 +4,7 @@ using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
 using System.Linq;
+using System.Threading.Tasks;
 using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
@@ -46,19 +47,26 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         }
 
         [Fact]
-        public void Scenario()
+        public async Task Scenario()
         {
-            Host.PublishEvent("OrderedEvent", string.Empty, 1, new DateTime(2000, 1, 1, 0, 1, 1));
-            Host.PublishEvent("OrderedEvent", string.Empty, 2, new DateTime(2000, 1, 1, 0, 2, 1));
-            Host.PublishEvent("OrderedEvent", string.Empty, 3, new DateTime(2000, 1, 1, 0, 3, 1));
-            Host.PublishEvent("OrderedEvent", string.Empty, 4, new DateTime(2000, 1, 1, 0, 4, 1));
-            Host.PublishEvent("OrderedEvent", string.Empty, 5, new DateTime(2000, 1, 1, 0, 5, 1));
+            await Host.PublishEvent("OrderedEvent", string.Empty, 1, new DateTime(2000, 1, 1, 0, 1, 1));
+            await Host.PublishEvent("OrderedEvent", string.Empty, 2, new DateTime(2000, 1, 1, 0, 2, 1));
+            await Host.PublishEvent("OrderedEvent", string.Empty, 3, new DateTime(2000, 1, 1, 0, 3, 1));
+            await Host.PublishEvent("OrderedEvent", string.Empty, 4, new DateTime(2000, 1, 1, 0, 4, 1));
+            await Host.PublishEvent("OrderedEvent", string.Empty, 5, new DateTime(2000, 1, 1, 0, 5, 1));
 
             var workflowId = StartWorkflow(new MyDataClass());
             
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
-            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            var workflow = (await PersistenceProvider.GetWorkflowInstance(workflowId))!;
+            var pointers = string.Join("; ", workflow.ExecutionPointers.Select(x =>
+                $"Step={x.StepId},Status={x.Status},Active={x.Active},EventPublished={x.EventPublished},End={x.EndTime?.ToString("O") ?? "null"}"));
+            var subscriptions = string.Join("; ", (await PersistenceProvider
+                .GetSubscriptions("OrderedEvent", string.Empty, DateTime.MaxValue))
+                .Select(x => $"Step={x.StepId},Pointer={x.ExecutionPointerId},AsOf={x.SubscribeAsOf:O}"));
+
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete, $"Pointers: {pointers}. Subscriptions: {subscriptions}");
             UnhandledStepErrors.Count.Should().Be(0);
             GetData(workflowId).Value1.Should().Be(1);
             GetData(workflowId).Value2.Should().Be(2);

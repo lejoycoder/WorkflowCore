@@ -109,12 +109,29 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 var workflow = await _workflowRepository.GetWorkflowInstance(sub.WorkflowId, cancellationToken);
-                IEnumerable<ExecutionPointer> pointers = null;
+                List<ExecutionPointer> pointers;
 
                 if (!string.IsNullOrEmpty(sub.ExecutionPointerId))
-                    pointers = workflow.ExecutionPointers.Where(p => p.Id == sub.ExecutionPointerId && !p.EventPublished && p.EndTime == null);
+                {
+                    var pointer = workflow.ExecutionPointers.FindById(sub.ExecutionPointerId);
+                    if (pointer == null || pointer.EventPublished || pointer.EndTime != null)
+                    {
+                        return false;
+                    }
+
+                    pointers = [pointer];
+                }
                 else
-                    pointers = workflow.ExecutionPointers.Where(p => p.EventName == sub.EventName && p.EventKey == sub.EventKey && !p.EventPublished && p.EndTime == null);
+                {
+                    pointers = workflow.ExecutionPointers
+                        .Where(p => p.EventName == sub.EventName && p.EventKey == sub.EventKey && !p.EventPublished && p.EndTime == null)
+                        .ToList();
+                }
+
+                if (pointers.Count == 0)
+                {
+                    return false;
+                }
 
                 foreach (var p in pointers)
                 {

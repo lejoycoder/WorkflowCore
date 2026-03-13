@@ -87,6 +87,11 @@ namespace WorkflowCore.Models
         public List<string> Children { get; set; } = new List<string>();
 
         /// <summary>
+        /// 直接父分支指针ID，仅对子分支入口节点设置
+        /// </summary>
+        public string? ParentId { get; set; }
+
+        /// <summary>
         /// 上下文项，在 ForEach 循环中保存当前处理的项目
         /// </summary>
         public object? ContextItem { get; set; }
@@ -95,6 +100,16 @@ namespace WorkflowCore.Models
         /// 前驱指针ID，用于跟踪步骤依赖关系
         /// </summary>
         public string? PredecessorId { get; set; }
+
+        /// <summary>
+        /// 前驱步骤的结果，用于在清理历史指针后继续传递结果
+        /// </summary>
+        public object? PredecessorOutcome { get; set; }
+
+        /// <summary>
+        /// 父分支步骤的结果，用于控制分支在清理历史指针后继续工作
+        /// </summary>
+        public object? ParentOutcome { get; set; }
 
         /// <summary>
         /// 步骤执行结果，用于决定下一个执行的分支

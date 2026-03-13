@@ -36,8 +36,7 @@ namespace WorkflowCore.Primitives
 
         private object GetPreviousOutcome(IStepExecutionContext context)
         {
-            var prevPointer = context.Workflow.ExecutionPointers.FindById(context.ExecutionPointer.PredecessorId);
-            return prevPointer.Outcome;
+            return context.ExecutionPointer.PredecessorOutcome;
         }
     }
 }

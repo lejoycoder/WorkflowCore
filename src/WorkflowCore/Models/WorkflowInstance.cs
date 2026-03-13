@@ -60,9 +60,7 @@ namespace WorkflowCore.Models
         /// <returns>如果该分支的所有执行指针都已结束则返回 true，否则返回 false</returns>
         public bool IsBranchComplete(string parentId)
         {
-            return ExecutionPointers
-                .FindByScope(parentId)
-                .All(x => x.EndTime != null);
+            return !ExecutionPointers.HasDescendants(parentId);
         }
     }
 

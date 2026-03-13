@@ -47,16 +47,14 @@ public static class WorkflowExtension
     {
         var workflows = (await workflowHost.PersistenceStore.FindWorkflowByDefinitionId(workflowName)).Where(n => (int)n.Status <= 1).ToList();
         var count = workflows.Count;
-
-        switch (count)
+        if (count == 0)
         {
-            case > 1:
-                throw new Exception("当前有多个实例,无法进行终止");
-            case 0:
-                return;
-            default:
-                await workflowHost.TerminateWorkflow(workflows[0].Id);
-                break;
+            return;
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            await workflowHost.TerminateWorkflow(workflows[i].Id);
         }
     }
 

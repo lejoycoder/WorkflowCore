@@ -33,8 +33,18 @@ namespace WorkflowCore.Models
         public DateTime EventTime { get; set; }
 
         /// <summary>
+        /// 事件创建时间，用于与业务事件时间分离的清理策略
+        /// </summary>
+        public DateTime CreatedTime { get; set; }
+
+        /// <summary>
         /// 事件是否已被处理的标志，用于避免重复处理同一事件
         /// </summary>
         public bool IsProcessed { get; set; }
+
+        /// <summary>
+        /// 事件最后一次被成功处理的时间
+        /// </summary>
+        public DateTime? ProcessedTime { get; set; }
     }
 }

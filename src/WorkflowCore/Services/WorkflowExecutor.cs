@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -54,10 +54,12 @@ namespace WorkflowCore.Services
         {
             // 初始化执行结果容器
             var wfResult = new WorkflowExecutorResult();
+            workflow.ExecutionPointers.CompactEndedPointers();
+            var now = DateTime.Now;
 
             // 筛选出需要立即执行的活跃执行指针
             // 条件：1.指针处于活跃状态 2.没有设置睡眠时间或睡眠时间已到
-            var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < DateTime.Now)));
+            var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.GetRunnablePointers(now));
 
             // 从注册表获取工作流定义
             var def = _registry.GetDefinition(workflow.WorkflowName, workflow.Version);
@@ -127,6 +129,9 @@ namespace WorkflowCore.Services
                     await middlewareRunner.RunPostMiddleware(workflow, def);
                 }
             }
+
+            // Final compaction keeps completed workflows lean and avoids stale ended pointers.
+            workflow.ExecutionPointers.CompactEndedPointers();
 
             return wfResult;
         }
@@ -243,25 +248,10 @@ namespace WorkflowCore.Services
             {
                 return;
             }
-            // 处理没有子指针的活跃执行指针（叶子节点）
-            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count == 0))
+
+            var blockedIds = workflow.ExecutionPointers.GetBlockedPointerIds();
+            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && !blockedIds.Contains(x.Id)))
             {
-                if (!pointer.SleepUntil.HasValue)
-                {
-                    workflow.NextExecution = 0;
-                    return;
-                }
-
-                var pointerSleep = pointer.SleepUntil.Value.Ticks;
-                workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
-            }
-
-            // 存在需执行的子指针
-            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
-            {
-                if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
-                    continue;
-
                 if (!pointer.SleepUntil.HasValue)
                 {
                     workflow.NextExecution = 0;

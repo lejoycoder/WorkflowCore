@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -113,6 +113,7 @@ namespace WorkflowCore.Services
             evt.EventData = eventData;
             evt.EventKey = eventKey;
             evt.EventName = eventName;
+            evt.CreatedTime = DateTime.Now;
             evt.IsProcessed = false;
             string eventId = await _persistenceStore.CreateEvent(evt);
 

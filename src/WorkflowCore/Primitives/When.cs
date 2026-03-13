@@ -43,8 +43,7 @@ namespace WorkflowCore.Primitives
 
         private object GetSwitchOutcome(IStepExecutionContext context)
         {
-            var switchPointer = context.Workflow.ExecutionPointers.First(x => x.Children.Contains(context.ExecutionPointer.Id));
-            return switchPointer.Outcome;
+            return context.ExecutionPointer.ParentOutcome;
         }
     }
 }

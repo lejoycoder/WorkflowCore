@@ -86,7 +86,7 @@ namespace WorkflowCore.Services
                 }
             }
 
-            if (result.DesiredWorkflowStatus != WorkflowStatus.Runnable)
+            if (result.DesiredWorkflowStatus != workflow.Status)
             {
                 workflow.Status = result.DesiredWorkflowStatus;
 

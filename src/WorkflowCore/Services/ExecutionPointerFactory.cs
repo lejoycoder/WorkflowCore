@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WorkflowCore.Interface;
@@ -27,6 +27,7 @@ namespace WorkflowCore.Services
             {
                 Id = nextId,
                 PredecessorId = pointer.Id,
+                PredecessorOutcome = pointer.Outcome,
                 StepId = outcomeTarget.NextStep,
                 Active = true,
                 ContextItem = pointer.ContextItem,
@@ -46,6 +47,8 @@ namespace WorkflowCore.Services
             return new ExecutionPointer
             {
                 Id = childPointerId,
+                ParentId = pointer.Id,
+                ParentOutcome = pointer.Outcome,
                 PredecessorId = pointer.Id,
                 StepId = childDefinitionId,
                 Active = true,

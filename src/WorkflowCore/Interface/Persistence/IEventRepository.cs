@@ -62,12 +62,12 @@ namespace WorkflowCore.Interface
         Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Asynchronously removes all events that have expired as of the specified date and time.
+        /// 清理已过期事件。
+        /// 仅应清理已处理事件，且以事件处理时间作为过期判断依据。
         /// </summary>
-        /// <param name="asAt">The point in time used to determine which events are considered expired. Events with an expiration date
-        /// earlier than this value will be removed.</param>
-        /// <param name="_">A cancellation token that can be used to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous clear operation.</returns>
+        /// <param name="asAt">过期截止时间。</param>
+        /// <param name="_">取消令牌。</param>
+        /// <returns>异步任务。</returns>
         Task ClearExpiredEvents(DateTime asAt, CancellationToken _ = default);
     }
 }
