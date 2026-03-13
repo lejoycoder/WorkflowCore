@@ -7,7 +7,7 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageId>WorkflowCore.DesktopLite</PackageId>
     <Title>WorkflowCore Desktop Lite</Title>
-    <Version>2.0.0</Version>
+    <Version>2.0.1</Version>
     <PackageOutputPath>..\..\doc\nuget</PackageOutputPath>
     <PackageIcon>workflow.png</PackageIcon>
     <Description>为流程的构建提供便捷条件</Description>
