@@ -11,11 +11,11 @@
     <PackageOutputPath>..\..\doc\nuget</PackageOutputPath>
     <PackageIcon>workflow.png</PackageIcon>
     <Description>为流程的构建提供便捷条件</Description>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Authors>Lejoy</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageProjectUrl>https://github.com/lejoyke/WorkflowCore</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/lejoyke/WorkflowCore</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/lejoycoder/WorkflowCore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lejoycoder/WorkflowCore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
